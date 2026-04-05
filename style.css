@@ -1,23 +1,3 @@
-/* Charity: water Brand Colors & Fonts
-
-Primary Colors:
-- Yellow:     #FFC907
-- Blue:       #2E9DF7
-
-Secondary Colors:
-- Light Blue: #8BD1CB
-- Green:      #4FCB53
-- Orange:     #FF902A
-- Red:        #F5402C
-- Dark Green: #159A48
-- Pink:       #F16061
-
-Fonts:
-- Proxima Nova
-- Avenir
-
-*/
-
 * {
   box-sizing: border-box;
 }
@@ -25,75 +5,111 @@ Fonts:
 body {
   font-family: Arial, sans-serif;
   margin: 0;
-  padding: 30px;
-  background-color: #f0f0f0;
-  color: #333;
+  padding: 30px 20px;
+  background-color: #FFF7E1;
+  color: #1A1A1A;
 }
 
 .container {
-  max-width: 750px;
-  margin: 50px auto;
-  background-color: #fff;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 760px;
+  margin: 40px auto;
+  background-color: #ffffff;
+  padding: 36px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 51, 102, 0.08);
+  border: 2px solid #CBCBD1;
+}
+
+.brand-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.brand-logo {
+  max-width: 320px;
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 h1 {
   text-align: center;
-  font-size: 30px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-h1 img {
-  height: 50px;
-  margin-right: 15px;
-  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #003366;
 }
 
 .game-instructions {
-  font-size: 18px;
-  margin-bottom: 30px;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 18px auto 28px;
   text-align: center;
+  color: #1A1A1A;
+  max-width: 600px;
 }
 
 .stats {
   display: flex;
-  justify-content: space-around;
-  margin-bottom: 30px;
-  background-color: #f5f5f5;
-  padding: 15px 0;
-  border-radius: 8px;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  background-color: #F4F8FA;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid #CBCBD1;
+  flex-wrap: wrap;
 }
 
 .stats p {
   margin: 0;
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #003366;
+}
+
+.achievement {
+  min-height: 32px;
+  text-align: center;
+  font-weight: 700;
+  color: #159A48;
+  margin-bottom: 18px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.achievement.show {
+  opacity: 1;
 }
 
 .game-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  gap: 14px;
   margin: 0 auto;
   max-width: 500px;
 }
 
 .grid-cell {
-  background-color: #e8e8e8;
-  border-radius: 8px;
+  background-color: #EAF3F6;
+  border: 2px solid #77A8BB;
+  border-radius: 14px;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: transform 0.15s ease, background-color 0.2s ease;
   position: relative;
   overflow: hidden;
+}
+
+.grid-cell:hover {
+  background-color: #dbeef4;
+  transform: translateY(-2px);
 }
 
 .water-can-wrapper {
@@ -101,43 +117,136 @@ h1 img {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 70px;
-  height: 70px;
-  /* Ensure the wrapper is properly centered */
+  width: 72px;
+  height: 72px;
 }
 
 .water-can {
   width: 100%;
   height: 100%;
   background-image: url('img/water-can.png');
-  background-size: cover;
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
-  border-radius: 50%;
-  animation: popUp 0.5s cubic-bezier(0.17, 0.67, 0.34, 2);
-  transform-origin: center; /* Ensure scaling happens from the center */
+  animation: popUp 0.35s cubic-bezier(0.17, 0.67, 0.34, 2);
+  transform-origin: center;
 }
 
 @keyframes popUp {
   0% {
-    transform: scale(0.5); /* Start scaling from the center */
+    transform: scale(0.55);
+    opacity: 0.5;
   }
   100% {
-    transform: scale(1); /* End scaling at full size */
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 28px auto 0;
+  flex-wrap: wrap;
+}
 
 button {
-  background-color: #4CAF50;
-  color: white;
+  background-color: #FFC907;
+  color: #1A1A1A;
   border: none;
-  padding: 12px 24px;
-  font-size: 16px;
-  border-radius: 8px;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 999px;
   cursor: pointer;
-  display: block;
-  margin: 30px auto 0;
-  transition: background-color 0.2s;
+  margin: 0;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.secondary-button {
+  background-color: #2E9DF7;
+  color: #ffffff;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(255, 201, 7, 0.35);
+}
+
+.secondary-button:hover {
+  box-shadow: 0 6px 18px rgba(46, 157, 247, 0.35);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 24px 18px;
+  }
+
+  .stats {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .water-can-wrapper {
+    width: 60px;
+    height: 60px;
+  }
+
+  .brand-logo {
+    max-width: 260px;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+  }
+
+  .button-row {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.dirty-can {
+  filter: grayscale(1) brightness(0.65);
+  opacity: 0.95;
+}
+
+.confetti-piece {
+  position: fixed;
+  top: -12px;
+  width: 10px;
+  height: 18px;
+  background-color: #FFC907;
+  z-index: 9999;
+  pointer-events: none;
+  animation: confettiFall linear forwards;
+}
+
+.confetti-piece:nth-child(3n) {
+  background-color: #003366;
+}
+
+.confetti-piece:nth-child(3n + 1) {
+  background-color: #77A8BB;
+}
+
+.confetti-piece:nth-child(3n + 2) {
+  background-color: #BF6C46;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
 }

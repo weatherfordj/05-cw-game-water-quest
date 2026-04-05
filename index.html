@@ -3,21 +3,35 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Water Quest</title>
+  <title>Rush for Water</title>
   <link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
   <div class="container">
-    <h1>Water Quest</h1>
-    <p class="game-instructions">Collect 20 items to complete the game!</p>
+    <div class="brand-header">
+      <img src="img/Charity_Logo.jpg" alt="charity: water logo" class="brand-logo">
+      <h1>Rush for Water</h1>
+    </div>
+
+    <p class="game-instructions">
+      Collect 20 jerrycans before the timer runs out, but avoid dirty cans!
+    </p>
+
     <div class="stats">
       <p>Cans Collected: <span id="current-cans">0</span></p>
       <p>Time Left: <span id="timer">30</span>s</p>
     </div>
+
     <div id="achievements" class="achievement"></div>
+
     <div class="game-grid"></div>
-    <button id="start-game">Start Game</button>
+
+    <div class="button-row">
+      <button id="start-game">Start Game</button>
+      <button id="reset-game" class="secondary-button">Reset Game</button>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
