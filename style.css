@@ -2,22 +2,71 @@
   box-sizing: border-box;
 }
 
+:root {
+  --brand-yellow: #FFC907;
+  --brand-blue: #2E9DF7;
+  --brand-aqua: #8BD1CB;
+  --brand-lime: #4FCB53;
+  --brand-orange: #FF902A;
+  --brand-red: #F5402C;
+  --brand-green: #159A48;
+  --brand-coral: #F16061;
+  --text-dark: #1A1A1A;
+  --surface-light: #FFFFFF;
+  --line-light: #CBCBD1;
+}
+
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Proxima Nova", Avenir, "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 30px 20px;
-  background-color: #FFF7E1;
-  color: #1A1A1A;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 201, 7, 0.55), transparent 34%),
+    radial-gradient(circle at 88% 16%, rgba(46, 157, 247, 0.45), transparent 36%),
+    radial-gradient(circle at 24% 88%, rgba(241, 96, 97, 0.3), transparent 38%),
+    linear-gradient(145deg, #FFF5C8 0%, #EAF7FF 46%, #E6FAF6 100%);
+  color: var(--text-dark);
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('img/water-can-transparent.png');
+  background-repeat: repeat;
+  background-size: 138px;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: -20% -8% 0;
+  background:
+    radial-gradient(ellipse at 10% 45%, rgba(79, 203, 83, 0.22), transparent 58%),
+    radial-gradient(ellipse at 92% 62%, rgba(255, 144, 42, 0.24), transparent 55%),
+    radial-gradient(ellipse at 52% 8%, rgba(46, 157, 247, 0.2), transparent 50%);
+  transform: translate3d(0, 0, 0);
+  animation: driftBackdrop 18s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .container {
   max-width: 760px;
   margin: 40px auto;
-  background-color: #ffffff;
+  background-color: var(--surface-light);
   padding: 36px;
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 51, 102, 0.08);
-  border: 2px solid #CBCBD1;
+  box-shadow: 0 8px 24px rgba(46, 157, 247, 0.16);
+  border: 2px solid var(--line-light);
+  position: relative;
+  z-index: 1;
 }
 
 .brand-header {
@@ -40,16 +89,39 @@ h1 {
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
-  color: #003366;
+  color: var(--brand-blue);
 }
 
 .game-instructions {
   font-size: 1.05rem;
   line-height: 1.6;
-  margin: 18px auto 28px;
+  margin: 18px auto 20px;
   text-align: center;
-  color: #1A1A1A;
+  color: var(--text-dark);
   max-width: 600px;
+}
+
+.difficulty-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: var(--brand-blue);
+}
+
+#difficulty {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line-light);
+  font-family: "Proxima Nova", Avenir, "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+}
+
+#difficulty:focus-visible {
+  outline: 3px solid var(--brand-coral);
+  outline-offset: 2px;
 }
 
 .stats {
@@ -57,10 +129,10 @@ h1 {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 24px;
-  background-color: #F4F8FA;
+  background-color: #F0FCFB;
   padding: 16px 20px;
   border-radius: 12px;
-  border: 1px solid #CBCBD1;
+  border: 1px solid var(--brand-aqua);
   flex-wrap: wrap;
 }
 
@@ -68,14 +140,14 @@ h1 {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
-  color: #003366;
+  color: var(--brand-blue);
 }
 
 .achievement {
   min-height: 32px;
   text-align: center;
   font-weight: 700;
-  color: #159A48;
+  color: var(--brand-green);
   margin-bottom: 18px;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -94,8 +166,8 @@ h1 {
 }
 
 .grid-cell {
-  background-color: #EAF3F6;
-  border: 2px solid #77A8BB;
+  background-color: #F7FDFC;
+  border: 2px solid var(--brand-aqua);
   border-radius: 14px;
   aspect-ratio: 1;
   display: flex;
@@ -108,7 +180,7 @@ h1 {
 }
 
 .grid-cell:hover {
-  background-color: #dbeef4;
+  background-color: #E8F8F5;
   transform: translateY(-2px);
 }
 
@@ -153,8 +225,8 @@ h1 {
 }
 
 button {
-  background-color: #FFC907;
-  color: #1A1A1A;
+  background-color: var(--brand-yellow);
+  color: var(--text-dark);
   border: none;
   padding: 14px 28px;
   font-size: 1rem;
@@ -163,27 +235,141 @@ button {
   cursor: pointer;
   margin: 0;
   transition: transform 0.15s ease, box-shadow 0.2s ease;
+  font-family: "Proxima Nova", Avenir, "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 .secondary-button {
-  background-color: #2E9DF7;
+  background-color: var(--brand-blue);
   color: #ffffff;
 }
 
 button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(255, 201, 7, 0.35);
+  box-shadow: 0 6px 18px rgba(255, 201, 7, 0.45);
 }
 
 .secondary-button:hover {
-  box-shadow: 0 6px 18px rgba(46, 157, 247, 0.35);
+  box-shadow: 0 6px 18px rgba(46, 157, 247, 0.45);
 }
 
 button:active {
   transform: translateY(0);
 }
 
+.dirty-can {
+  filter: sepia(0.9) saturate(1.6) hue-rotate(-20deg) brightness(0.9);
+  opacity: 0.95;
+}
+
+.site-footer {
+  margin-top: 32px;
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-light);
+}
+
+.site-footer p {
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: var(--brand-blue);
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--brand-blue);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.footer-links a:last-child {
+  color: var(--brand-orange);
+}
+
+.footer-links a:hover {
+  color: var(--brand-red);
+  text-decoration: underline;
+}
+
+.confetti-piece {
+  position: fixed;
+  top: -12px;
+  width: 10px;
+  height: 18px;
+  background-color: var(--brand-yellow);
+  z-index: 9999;
+  pointer-events: none;
+  animation: confettiFall linear forwards;
+}
+
+.confetti-piece:nth-child(8n) {
+  background-color: var(--brand-blue);
+}
+
+.confetti-piece:nth-child(8n + 1) {
+  background-color: var(--brand-aqua);
+}
+
+.confetti-piece:nth-child(8n + 2) {
+  background-color: var(--brand-lime);
+}
+
+.confetti-piece:nth-child(8n + 3) {
+  background-color: var(--brand-orange);
+}
+
+.confetti-piece:nth-child(8n + 4) {
+  background-color: var(--brand-red);
+}
+
+.confetti-piece:nth-child(8n + 5) {
+  background-color: var(--brand-green);
+}
+
+.confetti-piece:nth-child(8n + 6) {
+  background-color: var(--brand-coral);
+}
+
+.confetti-piece:nth-child(8n + 7) {
+  background-color: var(--brand-yellow);
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes driftBackdrop {
+  0% {
+    transform: translate3d(-1.5%, -1%, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(1.5%, 1.4%, 0) scale(1.03);
+  }
+}
+
 @media (max-width: 600px) {
+  body::before {
+    background-size: 96px;
+    opacity: 0.07;
+  }
+
+  body::after {
+    inset: -10% -12% 0;
+    opacity: 0.85;
+  }
+
   .container {
     padding: 24px 18px;
   }
@@ -210,43 +396,8 @@ button:active {
     flex-direction: column;
     align-items: center;
   }
-}
 
-.dirty-can {
-  filter: grayscale(1) brightness(0.65);
-  opacity: 0.95;
-}
-
-.confetti-piece {
-  position: fixed;
-  top: -12px;
-  width: 10px;
-  height: 18px;
-  background-color: #FFC907;
-  z-index: 9999;
-  pointer-events: none;
-  animation: confettiFall linear forwards;
-}
-
-.confetti-piece:nth-child(3n) {
-  background-color: #003366;
-}
-
-.confetti-piece:nth-child(3n + 1) {
-  background-color: #77A8BB;
-}
-
-.confetti-piece:nth-child(3n + 2) {
-  background-color: #BF6C46;
-}
-
-@keyframes confettiFall {
-  0% {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(110vh) rotate(720deg);
-    opacity: 0;
+  .difficulty-row {
+    flex-direction: column;
   }
 }

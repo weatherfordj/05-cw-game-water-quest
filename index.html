@@ -14,11 +14,21 @@
     </div>
 
     <p class="game-instructions">
-      Collect 20 jerrycans before the timer runs out, but avoid dirty cans!
+      Collect clean jerrycans before time runs out, but avoid dirty cans!
     </p>
+
+    <div class="difficulty-row">
+      <label for="difficulty">Difficulty:</label>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="normal" selected>Normal</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
 
     <div class="stats">
       <p>Cans Collected: <span id="current-cans">0</span></p>
+      <p>Goal: <span id="goal-cans">20</span></p>
       <p>Time Left: <span id="timer">30</span>s</p>
     </div>
 
@@ -30,6 +40,14 @@
       <button id="start-game">Start Game</button>
       <button id="reset-game" class="secondary-button">Reset Game</button>
     </div>
+
+    <footer class="site-footer">
+      <p>Learn more about the mission behind this game:</p>
+      <div class="footer-links">
+        <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer" aria-label="Visit the charity: water website">Visit charity: water</a>
+        <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer" aria-label="Donate on the charity: water donation page">Donate to charity: water</a>
+      </div>
+    </footer>
   </div>
 
   <script src="script.js"></script>

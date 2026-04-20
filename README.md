@@ -45,3 +45,29 @@ These are the minimum requirements, but if you'd like an additional challenge go
 
 If you have any questions or need any assistance with your code, reach out to the HelpHub or attend a Drop-In Hour. You got this!!
 
+## Adding Sound Effects
+
+This project is set up to play sound effects for:
+
+- collecting a can
+- missing one (dirty can or running out of time)
+- clicking buttons (Start, Reset, difficulty change)
+- winning the game
+
+### 1. Download free clips
+
+Use a free sound library such as Pixabay or Freesound.
+
+### 2. Upload clips to the project
+
+Put your files in the `sounds/` folder at the project root.
+
+### 3. Use these exact filenames
+
+- `sounds/collect.mp3`
+- `sounds/miss.mp3`
+- `sounds/click.mp3`
+- `sounds/win.mp3`
+
+If your files use different names or extensions, update the file paths in `script.js` where the `sounds` object is defined.
+

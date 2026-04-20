@@ -1,28 +1,100 @@
-const GAME_TIME = 30;
-const GOAL_CANS = 20;
-const BASE_SPAWN_DELAY = 900;
-const MIN_SPAWN_DELAY = 400;
-const SPEEDUP_START_TIME = 15;
-const OBSTACLE_CHANCE = 0.25; // 25% chance of obstacle
-
 let currentCans = 0;
-let timeLeft = GAME_TIME;
+let timeLeft = 30;
+let goalCans = 20;
+let baseSpawnDelay = 900;
+let minSpawnDelay = 400;
+let obstacleChance = 0.25;
+
+const SPEEDUP_START_TIME = 15;
+const GAME_START_DELAY_MS = 5000;
+
 let gameActive = false;
 let spawnInterval;
 let timerInterval;
+let startDelayTimeout;
+
+const sounds = {
+  collect: new Audio('sounds/collect.mp3'),
+  point: new Audio('sounds/Point.mp3'),
+  miss: new Audio('sounds/miss.mp3'),
+  mistake: new Audio('sounds/Mistake.mp3'),
+  click: new Audio('sounds/click.mp3'),
+  win: new Audio('sounds/Win.mp3'),
+  gameStart: new Audio('sounds/Game_Start.mp3')
+};
+
+Object.values(sounds).forEach(sound => {
+  sound.preload = 'auto';
+});
+
+sounds.collect.volume = 0.45;
+sounds.point.volume = 0.45;
+sounds.miss.volume = 0.55;
+sounds.mistake.volume = 0.55;
+sounds.click.volume = 0.35;
+sounds.win.volume = 0.65;
+sounds.gameStart.volume = 0.6;
+
+function playSound(name) {
+  const sound = sounds[name];
+  if (!sound) return;
+
+  sound.currentTime = 0;
+  sound.play().catch(() => {
+    // Ignore play errors (missing file or browser autoplay policy).
+  });
+}
+
+const difficultySettings = {
+  easy: {
+    time: 35,
+    goal: 15,
+    baseDelay: 1000,
+    minDelay: 500,
+    obstacleChance: 0.15
+  },
+  normal: {
+    time: 30,
+    goal: 20,
+    baseDelay: 900,
+    minDelay: 400,
+    obstacleChance: 0.25
+  },
+  hard: {
+    time: 25,
+    goal: 25,
+    baseDelay: 700,
+    minDelay: 250,
+    obstacleChance: 0.35
+  }
+};
+
+function applyDifficulty() {
+  const selected = document.getElementById('difficulty').value;
+  const settings = difficultySettings[selected];
+
+  timeLeft = settings.time;
+  goalCans = settings.goal;
+  baseSpawnDelay = settings.baseDelay;
+  minSpawnDelay = settings.minDelay;
+  obstacleChance = settings.obstacleChance;
+
+  document.getElementById('goal-cans').textContent = goalCans;
+  updateTimer();
+}
 
 function getSpawnDelay() {
   if (timeLeft > SPEEDUP_START_TIME) {
-    return BASE_SPAWN_DELAY;
+    return baseSpawnDelay;
   }
 
   const speedupRatio = (SPEEDUP_START_TIME - timeLeft) / SPEEDUP_START_TIME;
   const speedCurve = speedupRatio * speedupRatio;
-  const delayRange = BASE_SPAWN_DELAY - MIN_SPAWN_DELAY;
+  const delayRange = baseSpawnDelay - minSpawnDelay;
 
   return Math.max(
-    MIN_SPAWN_DELAY,
-    Math.round(BASE_SPAWN_DELAY - speedCurve * delayRange)
+    minSpawnDelay,
+    Math.round(baseSpawnDelay - speedCurve * delayRange)
   );
 }
 
@@ -34,6 +106,7 @@ function updateSpawnRate() {
 function createGrid() {
   const grid = document.querySelector('.game-grid');
   grid.innerHTML = '';
+
   for (let i = 0; i < 9; i++) {
     const cell = document.createElement('div');
     cell.className = 'grid-cell';
@@ -66,7 +139,7 @@ function spawnWaterCan() {
   cells.forEach(cell => (cell.innerHTML = ''));
 
   const randomCell = cells[Math.floor(Math.random() * cells.length)];
-  const isObstacle = Math.random() < OBSTACLE_CHANCE;
+  const isObstacle = Math.random() < obstacleChance;
 
   if (isObstacle) {
     randomCell.innerHTML = `
@@ -92,20 +165,20 @@ function spawnWaterCan() {
 function collectCan() {
   if (!gameActive) return;
 
+  playSound('point');
+
   currentCans++;
   updateScore();
 
   this.parentElement.parentElement.innerHTML = '';
 
-  if (currentCans === 5) {
-    showAchievement('Great start — every can counts!');
-  } else if (currentCans === 10) {
-    showAchievement('Amazing — you are building momentum!');
-  } else if (currentCans === 15) {
-    showAchievement('Keep going — clean water is worth it!');
+  if (currentCans === Math.floor(goalCans / 2)) {
+    showAchievement('Halfway there!');
+  } else if (currentCans === goalCans - 5) {
+    showAchievement('Almost there — keep going!');
   }
 
-  if (currentCans >= GOAL_CANS) {
+  if (currentCans >= goalCans) {
     endGame(true);
   }
 }
@@ -113,7 +186,13 @@ function collectCan() {
 function hitObstacle() {
   if (!gameActive) return;
 
+  const hadPointToLose = currentCans > 0;
   currentCans = Math.max(0, currentCans - 1);
+
+  if (hadPointToLose) {
+    playSound('mistake');
+  }
+
   updateScore();
 
   this.parentElement.parentElement.innerHTML = '';
@@ -123,9 +202,11 @@ function hitObstacle() {
 function startGame() {
   if (gameActive) return;
 
+  applyDifficulty();
+
   gameActive = true;
+  playSound('gameStart');
   currentCans = 0;
-  timeLeft = GAME_TIME;
 
   updateScore();
   updateTimer();
@@ -135,23 +216,30 @@ function startGame() {
   achievement.classList.remove('show');
 
   createGrid();
-  spawnWaterCan();
-  updateSpawnRate();
 
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    updateTimer();
+  clearTimeout(startDelayTimeout);
+  startDelayTimeout = setTimeout(() => {
+    if (!gameActive) return;
 
-    if (timeLeft <= 0) {
-      endGame(false);
-    } else {
-      updateSpawnRate();
-    }
-  }, 1000);
+    spawnWaterCan();
+    updateSpawnRate();
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimer();
+
+      if (timeLeft <= 0) {
+        endGame(false);
+      } else {
+        updateSpawnRate();
+      }
+    }, 1000);
+  }, GAME_START_DELAY_MS);
 }
 
 function endGame(won) {
   gameActive = false;
+  clearTimeout(startDelayTimeout);
   clearInterval(spawnInterval);
   clearInterval(timerInterval);
 
@@ -160,23 +248,24 @@ function endGame(won) {
   });
 
   if (won) {
+    playSound('win');
     showAchievement('You win! Clean water champion!');
     launchConfetti();
   } else {
+    playSound('miss');
     showAchievement(`Time’s up! You collected ${currentCans} cans.`);
   }
 }
 
 function resetGame() {
   gameActive = false;
+  clearTimeout(startDelayTimeout);
   clearInterval(spawnInterval);
   clearInterval(timerInterval);
 
   currentCans = 0;
-  timeLeft = GAME_TIME;
-
+  applyDifficulty();
   updateScore();
-  updateTimer();
 
   const achievement = document.getElementById('achievements');
   achievement.textContent = '';
@@ -204,8 +293,24 @@ function launchConfetti() {
 }
 
 createGrid();
+applyDifficulty();
 updateScore();
-updateTimer();
 
-document.getElementById('start-game').addEventListener('click', startGame);
-document.getElementById('reset-game').addEventListener('click', resetGame);
+const startButton = document.getElementById('start-game');
+const resetButton = document.getElementById('reset-game');
+const difficultySelect = document.getElementById('difficulty');
+
+startButton.addEventListener('click', () => {
+  playSound('click');
+  startGame();
+});
+
+resetButton.addEventListener('click', () => {
+  playSound('click');
+  resetGame();
+});
+
+difficultySelect.addEventListener('change', () => {
+  playSound('click');
+  resetGame();
+});
