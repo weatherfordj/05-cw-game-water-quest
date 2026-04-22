@@ -13,6 +13,8 @@ let spawnInterval;
 let timerInterval;
 let startDelayTimeout;
 
+const gridSize = 9;
+
 const sounds = {
   collect: new Audio('sounds/collect.mp3'),
   point: new Audio('sounds/Point.mp3'),
@@ -34,6 +36,15 @@ sounds.mistake.volume = 0.55;
 sounds.click.volume = 0.35;
 sounds.win.volume = 0.65;
 sounds.gameStart.volume = 0.6;
+
+const goalCansElement = document.getElementById('goal-cans');
+const currentCansElement = document.getElementById('current-cans');
+const timerElement = document.getElementById('timer');
+const achievementElement = document.getElementById('achievements');
+const difficultySelect = document.getElementById('difficulty');
+const startButton = document.getElementById('start-game');
+const resetButton = document.getElementById('reset-game');
+const gridElement = document.querySelector('.game-grid');
 
 function playSound(name) {
   const sound = sounds[name];
@@ -70,7 +81,7 @@ const difficultySettings = {
 };
 
 function applyDifficulty() {
-  const selected = document.getElementById('difficulty').value;
+  const selected = difficultySelect.value;
   const settings = difficultySettings[selected];
 
   timeLeft = settings.time;
@@ -79,7 +90,7 @@ function applyDifficulty() {
   minSpawnDelay = settings.minDelay;
   obstacleChance = settings.obstacleChance;
 
-  document.getElementById('goal-cans').textContent = goalCans;
+  goalCansElement.textContent = goalCans;
   updateTimer();
 }
 
@@ -104,62 +115,77 @@ function updateSpawnRate() {
 }
 
 function createGrid() {
-  const grid = document.querySelector('.game-grid');
-  grid.innerHTML = '';
+  gridElement.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < gridSize; i++) {
     const cell = document.createElement('div');
     cell.className = 'grid-cell';
-    grid.appendChild(cell);
+    fragment.appendChild(cell);
   }
+
+  gridElement.appendChild(fragment);
 }
 
 function updateScore() {
-  document.getElementById('current-cans').textContent = currentCans;
+  currentCansElement.textContent = currentCans;
 }
 
 function updateTimer() {
-  document.getElementById('timer').textContent = timeLeft;
+  timerElement.textContent = timeLeft;
 }
 
 function showAchievement(message) {
-  const achievement = document.getElementById('achievements');
-  achievement.textContent = message;
-  achievement.classList.add('show');
+  achievementElement.textContent = message;
+  achievementElement.classList.add('show');
 
   setTimeout(() => {
-    achievement.classList.remove('show');
+    achievementElement.classList.remove('show');
   }, 1400);
+}
+
+function clearAchievement() {
+  achievementElement.textContent = '';
+  achievementElement.classList.remove('show');
+}
+
+function clearGridCells() {
+  document.querySelectorAll('.grid-cell').forEach(cell => {
+    cell.innerHTML = '';
+  });
+}
+
+function stopGameLoops() {
+  clearTimeout(startDelayTimeout);
+  clearInterval(spawnInterval);
+  clearInterval(timerInterval);
+}
+
+function renderCanMarkup(isObstacle) {
+  return `
+      <div class="water-can-wrapper">
+        <div class="water-can${isObstacle ? ' dirty-can' : ''}" aria-label="${isObstacle ? 'Dirty can obstacle' : 'Collect water can'}"></div>
+      </div>
+    `;
 }
 
 function spawnWaterCan() {
   if (!gameActive) return;
 
   const cells = document.querySelectorAll('.grid-cell');
-  cells.forEach(cell => (cell.innerHTML = ''));
+  clearGridCells();
 
   const randomCell = cells[Math.floor(Math.random() * cells.length)];
   const isObstacle = Math.random() < obstacleChance;
 
+  randomCell.innerHTML = renderCanMarkup(isObstacle);
+
   if (isObstacle) {
-    randomCell.innerHTML = `
-      <div class="water-can-wrapper">
-        <div class="water-can dirty-can" aria-label="Dirty can obstacle"></div>
-      </div>
-    `;
-
-    const dirtyCan = randomCell.querySelector('.dirty-can');
-    dirtyCan.addEventListener('click', hitObstacle);
-  } else {
-    randomCell.innerHTML = `
-      <div class="water-can-wrapper">
-        <div class="water-can" aria-label="Collect water can"></div>
-      </div>
-    `;
-
-    const waterCan = randomCell.querySelector('.water-can');
-    waterCan.addEventListener('click', collectCan);
+    randomCell.querySelector('.dirty-can').addEventListener('click', hitObstacle);
+    return;
   }
+
+  randomCell.querySelector('.water-can').addEventListener('click', collectCan);
 }
 
 function collectCan() {
@@ -210,10 +236,7 @@ function startGame() {
 
   updateScore();
   updateTimer();
-
-  const achievement = document.getElementById('achievements');
-  achievement.textContent = '';
-  achievement.classList.remove('show');
+  clearAchievement();
 
   createGrid();
 
@@ -239,13 +262,8 @@ function startGame() {
 
 function endGame(won) {
   gameActive = false;
-  clearTimeout(startDelayTimeout);
-  clearInterval(spawnInterval);
-  clearInterval(timerInterval);
-
-  document.querySelectorAll('.grid-cell').forEach(cell => {
-    cell.innerHTML = '';
-  });
+  stopGameLoops();
+  clearGridCells();
 
   if (won) {
     playSound('win');
@@ -259,17 +277,12 @@ function endGame(won) {
 
 function resetGame() {
   gameActive = false;
-  clearTimeout(startDelayTimeout);
-  clearInterval(spawnInterval);
-  clearInterval(timerInterval);
+  stopGameLoops();
 
   currentCans = 0;
   applyDifficulty();
   updateScore();
-
-  const achievement = document.getElementById('achievements');
-  achievement.textContent = '';
-  achievement.classList.remove('show');
+  clearAchievement();
 
   document.querySelectorAll('.confetti-piece').forEach(piece => piece.remove());
   createGrid();
@@ -295,10 +308,6 @@ function launchConfetti() {
 createGrid();
 applyDifficulty();
 updateScore();
-
-const startButton = document.getElementById('start-game');
-const resetButton = document.getElementById('reset-game');
-const difficultySelect = document.getElementById('difficulty');
 
 startButton.addEventListener('click', () => {
   playSound('click');
