@@ -4,9 +4,13 @@ let goalCans = 20;
 let baseSpawnDelay = 900;
 let minSpawnDelay = 400;
 let obstacleChance = 0.25;
+let cansPerSpawn = 1;
+let cleanCansPerSpawn = 0;
+let dirtyCansPerSpawn = 0;
 
 const SPEEDUP_START_TIME = 15;
 const GAME_START_DELAY_MS = 5000;
+const EASY_DIRTY_CAN_LIFETIME_MS = 900;
 
 let gameActive = false;
 let spawnInterval;
@@ -62,21 +66,30 @@ const difficultySettings = {
     goal: 15,
     baseDelay: 1000,
     minDelay: 500,
-    obstacleChance: 0.15
+    obstacleChance: 0.15,
+    cansPerSpawn: 2,
+    cleanCansPerSpawn: 1,
+    dirtyCansPerSpawn: 1
   },
   normal: {
     time: 30,
     goal: 20,
     baseDelay: 900,
     minDelay: 400,
-    obstacleChance: 0.25
+    obstacleChance: 0.25,
+    cansPerSpawn: 1,
+    cleanCansPerSpawn: 0,
+    dirtyCansPerSpawn: 0
   },
   hard: {
     time: 25,
     goal: 25,
     baseDelay: 700,
     minDelay: 250,
-    obstacleChance: 0.35
+    obstacleChance: 0.35,
+    cansPerSpawn: 1,
+    cleanCansPerSpawn: 0,
+    dirtyCansPerSpawn: 0
   }
 };
 
@@ -89,6 +102,9 @@ function applyDifficulty() {
   baseSpawnDelay = settings.baseDelay;
   minSpawnDelay = settings.minDelay;
   obstacleChance = settings.obstacleChance;
+  cansPerSpawn = settings.cansPerSpawn;
+  cleanCansPerSpawn = settings.cleanCansPerSpawn;
+  dirtyCansPerSpawn = settings.dirtyCansPerSpawn;
 
   goalCansElement.textContent = goalCans;
   updateTimer();
@@ -151,6 +167,7 @@ function clearAchievement() {
 
 function clearGridCells() {
   document.querySelectorAll('.grid-cell').forEach(cell => {
+    clearDirtyDespawnTimeout(cell);
     cell.innerHTML = '';
   });
 }
@@ -169,23 +186,96 @@ function renderCanMarkup(isObstacle) {
     `;
 }
 
-function spawnWaterCan() {
-  if (!gameActive) return;
+function clearDirtyDespawnTimeout(cell) {
+  if (!cell) return;
 
-  const cells = document.querySelectorAll('.grid-cell');
-  clearGridCells();
+  const timeoutId = cell.dataset.dirtyTimeoutId;
+  if (timeoutId) {
+    clearTimeout(Number(timeoutId));
+    delete cell.dataset.dirtyTimeoutId;
+  }
+}
 
-  const randomCell = cells[Math.floor(Math.random() * cells.length)];
-  const isObstacle = Math.random() < obstacleChance;
+function scheduleEasyDirtyDespawn(cell) {
+  clearDirtyDespawnTimeout(cell);
 
-  randomCell.innerHTML = renderCanMarkup(isObstacle);
+  const timeoutId = setTimeout(() => {
+    if (!gameActive || difficultySelect.value !== 'easy') return;
+
+    const dirtyCanStillPresent = cell.querySelector('.dirty-can');
+    if (!dirtyCanStillPresent) return;
+
+    cell.innerHTML = '';
+    delete cell.dataset.dirtyTimeoutId;
+    spawnReplacementCan(true);
+  }, EASY_DIRTY_CAN_LIFETIME_MS);
+
+  cell.dataset.dirtyTimeoutId = String(timeoutId);
+}
+
+function placeCanInCell(cell, isObstacle = Math.random() < obstacleChance) {
+  clearDirtyDespawnTimeout(cell);
+  cell.innerHTML = renderCanMarkup(isObstacle);
 
   if (isObstacle) {
-    randomCell.querySelector('.dirty-can').addEventListener('click', hitObstacle);
+    cell.querySelector('.dirty-can').addEventListener('click', hitObstacle);
+
+    if (difficultySelect.value === 'easy') {
+      scheduleEasyDirtyDespawn(cell);
+    }
+
     return;
   }
 
-  randomCell.querySelector('.water-can').addEventListener('click', collectCan);
+  cell.querySelector('.water-can').addEventListener('click', collectCan);
+}
+
+function spawnReplacementCan(isObstacle = null) {
+  if (!gameActive) return;
+
+  const emptyCells = Array.from(document.querySelectorAll('.grid-cell')).filter(
+    cell => cell.innerHTML.trim() === ''
+  );
+
+  if (emptyCells.length === 0) return;
+
+  const replacementCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  placeCanInCell(replacementCell, isObstacle === null ? Math.random() < obstacleChance : isObstacle);
+}
+
+function spawnWaterCan() {
+  if (!gameActive) return;
+
+  const cells = Array.from(document.querySelectorAll('.grid-cell'));
+  clearGridCells();
+
+  if (difficultySelect.value === 'easy') {
+    const shuffledCells = [...cells].sort(() => Math.random() - 0.5);
+    let nextCellIndex = 0;
+
+    const dirtyCount = Math.min(dirtyCansPerSpawn, shuffledCells.length);
+    for (let i = 0; i < dirtyCount; i++) {
+      placeCanInCell(shuffledCells[nextCellIndex], true);
+      nextCellIndex++;
+    }
+
+    const remainingCells = shuffledCells.length - nextCellIndex;
+    const cleanCount = Math.min(cleanCansPerSpawn, remainingCells);
+    for (let i = 0; i < cleanCount; i++) {
+      placeCanInCell(shuffledCells[nextCellIndex], false);
+      nextCellIndex++;
+    }
+
+    return;
+  }
+
+  const spawnCount = Math.min(cansPerSpawn, cells.length);
+  const shuffledCells = [...cells].sort(() => Math.random() - 0.5);
+  const selectedCells = shuffledCells.slice(0, spawnCount);
+
+  selectedCells.forEach(cell => {
+    placeCanInCell(cell);
+  });
 }
 
 function collectCan() {
@@ -196,7 +286,10 @@ function collectCan() {
   currentCans++;
   updateScore();
 
-  this.parentElement.parentElement.innerHTML = '';
+  const parentCell = this.closest('.grid-cell');
+  clearDirtyDespawnTimeout(parentCell);
+  parentCell.innerHTML = '';
+  spawnReplacementCan(false);
 
   if (currentCans === Math.floor(goalCans / 2)) {
     showAchievement('Halfway there!');
@@ -221,7 +314,10 @@ function hitObstacle() {
 
   updateScore();
 
-  this.parentElement.parentElement.innerHTML = '';
+  const parentCell = this.closest('.grid-cell');
+  clearDirtyDespawnTimeout(parentCell);
+  parentCell.innerHTML = '';
+  spawnReplacementCan(true);
   showAchievement('Oops! Dirty can — score -1');
 }
 
